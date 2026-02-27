@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
 
   return (
     <>
@@ -22,14 +22,20 @@ function App() {
           count is {count}
         </button>
         <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
+          Amazon Operations Console (AMZOPS) is a web-based application designed
+          to provide Amazon sellers with a comprehensive suite of tools and
+          features to manage their online businesses effectively.
         </p>
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        The console offers a user-friendly interface that allows sellers to
+        monitor their sales performance, manage inventory, track orders, and
+        access various analytics and reporting features. With AMZOPS, sellers
+        can streamline their operations, optimize their listings, and make
+        informed decisions to grow their Amazon business.
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
