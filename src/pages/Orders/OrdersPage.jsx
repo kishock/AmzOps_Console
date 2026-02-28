@@ -165,15 +165,15 @@ function OrdersApiSection({ refreshKey }) {
           <strong className="card-value primary">{orders.length}</strong>
         </article>
         <article className="panel-card stat-card compact-stat">
-          <p className="card-label">Open / Pending</p>
+          <p className="card-label">Pending</p>
           <strong className="card-value">
-            {countMatchingOrders(orders, ["pending", "unshipped", "open"])}
+            {countMatchingOrders(orders, ["pending"])}
           </strong>
         </article>
         <article className="panel-card stat-card compact-stat">
-          <p className="card-label">Shipped / Closed</p>
+          <p className="card-label">Unshipped</p>
           <strong className="card-value success">
-            {countMatchingOrders(orders, ["shipped", "closed", "delivered"])}
+            {countMatchingOrders(orders, ["unshipped"])}
           </strong>
         </article>
         <article className="panel-card stat-card compact-stat">
@@ -398,12 +398,14 @@ function OrderDetailPanel({ order }) {
         <DetailItem
           label="Last Update"
           value={
-            getField(order, [
-              "last_update_date",
-              "lastUpdatedAt",
-              "updated_at",
-              "updatedAt",
-            ]) || "Unavailable"
+            formatDisplayDate(
+              getField(order, [
+                "last_update_date",
+                "lastUpdatedAt",
+                "updated_at",
+                "updatedAt",
+              ]),
+            )
           }
         />
       </div>
@@ -453,38 +455,100 @@ function getOrderStatus(order) {
 }
 
 function getOrderDate(order) {
-  return (
-    getField(order, ["purchase_date", "PurchaseDate", "created_at", "createdAt"]) ||
-    "Unavailable"
-  );
+  const rawDate = getField(order, [
+    "purchase_date",
+    "PurchaseDate",
+    "created_at",
+    "createdAt",
+  ]);
+
+  return formatDisplayDate(rawDate);
 }
 
 function getBuyerLabel(order) {
   return (
-    getField(order, ["buyer_name", "buyerName", "customer_name", "customerName"]) ||
-    getField(order, ["buyer_email", "customer_email", "email"]) ||
+    getField(order, [
+      "Buyer",
+      "buyer_name",
+      "buyerName",
+      "customer_name",
+      "customerName",
+      "BuyerInfo.BuyerName",
+      "buyer_info.buyer_name",
+      "ShippingAddress.Name",
+      "shipping_address.name",
+    ]) ||
+    findFirstValueByNormalizedKey(order, [
+      "buyername",
+      "buyer_name",
+      "customername",
+      "customer_name",
+      "name",
+    ]) ||
+    getField(order, [
+      "buyer_email",
+      "customer_email",
+      "email",
+      "BuyerInfo.BuyerEmail",
+      "buyer_info.buyer_email",
+      "ShippingAddress.Email",
+      "shipping_address.email",
+    ]) ||
+    findFirstValueByNormalizedKey(order, [
+      "buyeremail",
+      "buyer_email",
+      "customeremail",
+      "customer_email",
+      "email",
+    ]) ||
     "Unavailable"
   );
 }
 
 function getOrderAmount(order) {
   const explicitAmount = getField(order, [
+    "Amount",
     "order_total",
     "amount",
     "total_amount",
     "OrderTotal",
+    "OrderTotal.Amount",
+    "order_total.amount",
+    "orderTotal.amount",
   ]);
 
+  const currency = getField(order, [
+    "OrderTotal.CurrencyCode",
+    "order_total.currency_code",
+    "orderTotal.currencyCode",
+  ]);
+  const nestedMoney = findMoneyObject(order);
+
   if (typeof explicitAmount === "object" && explicitAmount !== null) {
-    const currency =
+    const nestedCurrency =
       explicitAmount.currency_code || explicitAmount.CurrencyCode || "USD";
     const value = explicitAmount.amount || explicitAmount.Amount;
 
-    return value ? `${currency} ${value}` : "Unavailable";
+    return value ? `${nestedCurrency} ${value}` : "Unavailable";
   }
 
   if (explicitAmount !== undefined && explicitAmount !== null && explicitAmount !== "") {
-    return String(explicitAmount);
+    return formatCurrencyValue(explicitAmount, currency);
+  }
+
+  if (nestedMoney) {
+    return `${nestedMoney.currency} ${nestedMoney.amount}`;
+  }
+
+  const amountValue = findFirstValueByNormalizedKey(order, [
+    "amount",
+    "orderamount",
+    "ordertotal",
+    "totalamount",
+  ]);
+
+  if (amountValue !== undefined && amountValue !== null && amountValue !== "") {
+    return formatCurrencyValue(amountValue, currency);
   }
 
   return "Unavailable";
@@ -496,12 +560,172 @@ function getField(record, keys) {
   }
 
   for (const key of keys) {
-    if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
-      return record[key];
+    const value = getNestedValue(record, key);
+
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
     }
   }
 
   return undefined;
+}
+
+function getNestedValue(record, path) {
+  if (!record || typeof record !== "object") {
+    return undefined;
+  }
+
+  if (!path.includes(".")) {
+    return record[path];
+  }
+
+  return path.split(".").reduce((current, segment) => {
+    if (current && typeof current === "object") {
+      return current[segment];
+    }
+
+    return undefined;
+  }, record);
+}
+
+function findFirstValueByNormalizedKey(record, normalizedKeys) {
+  if (!record || typeof record !== "object") {
+    return undefined;
+  }
+
+  const visited = new Set();
+  const queue = [record];
+  const wanted = new Set(normalizedKeys.map(normalizeKey));
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current || typeof current !== "object" || visited.has(current)) {
+      continue;
+    }
+
+    visited.add(current);
+
+    if (Array.isArray(current)) {
+      for (const item of current) {
+        if (item && typeof item === "object") {
+          queue.push(item);
+        }
+      }
+
+      continue;
+    }
+
+    for (const [key, value] of Object.entries(current)) {
+      if (
+        wanted.has(normalizeKey(key)) &&
+        value !== undefined &&
+        value !== null &&
+        value !== "" &&
+        typeof value !== "object"
+      ) {
+        return value;
+      }
+
+      if (value && typeof value === "object") {
+        queue.push(value);
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function findMoneyObject(record) {
+  if (!record || typeof record !== "object") {
+    return undefined;
+  }
+
+  const visited = new Set();
+  const queue = [record];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+
+    if (!current || typeof current !== "object" || visited.has(current)) {
+      continue;
+    }
+
+    visited.add(current);
+
+    if (Array.isArray(current)) {
+      for (const item of current) {
+        if (item && typeof item === "object") {
+          queue.push(item);
+        }
+      }
+
+      continue;
+    }
+
+    const amount = current.amount ?? current.Amount;
+    const currency =
+      current.currency_code ?? current.CurrencyCode ?? current.currencyCode;
+
+    if (
+      amount !== undefined &&
+      amount !== null &&
+      amount !== "" &&
+      currency !== undefined &&
+      currency !== null &&
+      currency !== ""
+    ) {
+      return {
+        amount,
+        currency,
+      };
+    }
+
+    for (const value of Object.values(current)) {
+      if (value && typeof value === "object") {
+        queue.push(value);
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function normalizeKey(value) {
+  return String(value).replace(/[^a-z0-9]/gi, "").toLowerCase();
+}
+
+function formatDisplayDate(value) {
+  if (!value) {
+    return "Unavailable";
+  }
+
+  const parsedDate = new Date(value);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(parsedDate);
+}
+
+function formatCurrencyValue(value, currencyCode = "USD") {
+  const numericValue =
+    typeof value === "number" ? value : Number(String(value).replace(/,/g, ""));
+
+  if (!Number.isNaN(numericValue)) {
+    return currencyCode === "USD"
+      ? `$${numericValue.toFixed(2)}`
+      : `${currencyCode} ${numericValue.toFixed(2)}`;
+  }
+
+  return currencyCode === "USD" ? `$${value}` : currencyCode ? `${currencyCode} ${value}` : String(value);
 }
 
 export default OrdersPage;
