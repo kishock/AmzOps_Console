@@ -528,6 +528,10 @@
   overflow: auto;
 }
 
+.toolbar-response-box {
+  margin-top: 12px;
+}
+
 pre {
   margin: 12px 0 0;
   overflow-x: auto;

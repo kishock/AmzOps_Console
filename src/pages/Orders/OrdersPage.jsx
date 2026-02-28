@@ -16,6 +16,7 @@ function OrdersPage() {
   const [view, setView] = useState(ORDER_VIEWS.list);
   const [refreshKey, setRefreshKey] = useState(0);
   const [toolbarMessage, setToolbarMessage] = useState("");
+  const [toolbarResponse, setToolbarResponse] = useState(null);
   const [toolbarError, setToolbarError] = useState("");
   const [isClearing, setIsClearing] = useState(false);
 
@@ -31,13 +32,16 @@ function OrdersPage() {
     setIsClearing(true);
     setToolbarError("");
     setToolbarMessage("");
+    setToolbarResponse(null);
 
     try {
-      await deleteAllOrders();
+      const result = await deleteAllOrders();
       setRefreshKey((current) => current + 1);
       setToolbarMessage("All order data has been deleted.");
+      setToolbarResponse(result);
     } catch (requestError) {
       setToolbarMessage("");
+      setToolbarResponse(null);
       setToolbarError(
         requestError instanceof Error
           ? requestError.message
@@ -85,6 +89,18 @@ function OrdersPage() {
           layout and a structured detail panel.
         </p>
         {toolbarMessage ? <p className="feedback success-text">{toolbarMessage}</p> : null}
+        {toolbarResponse ? (
+          <pre className="response-box compact-box toolbar-response-box">
+            {JSON.stringify(
+              {
+                status: toolbarResponse.status,
+                data: toolbarResponse.data,
+              },
+              null,
+              2,
+            )}
+          </pre>
+        ) : null}
         {toolbarError ? <p className="feedback error-text">Error: {toolbarError}</p> : null}
       </section>
 
