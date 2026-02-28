@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import ApiTestPage from "./pages/ApiTest/ApiTestPage";
 import PageHeader from "./components/layout/PageHeader";
 import Sidebar from "./components/layout/Sidebar";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
@@ -8,12 +9,18 @@ import LogsPage from "./pages/Logs/LogsPage";
 import OrdersPage from "./pages/Orders/OrdersPage";
 import ReportsPage from "./pages/Reports/ReportsPage";
 
+const THEMES = {
+  white: "white",
+  dark: "dark",
+};
+
 const NAV_ITEMS = [
-  { key: "dashboard", label: "Dashboard", href: "#/dashboard" },
-  { key: "orders", label: "Orders", href: "#/orders" },
-  { key: "inventory", label: "Inventory", href: "#/inventory" },
-  { key: "reports", label: "Reports", href: "#/reports" },
-  { key: "logs", label: "Logs", href: "#/logs" },
+  { key: "dashboard", label: "Dashboard", href: "#/dashboard", icon: "grid" },
+  { key: "api-test", label: "API Test", href: "#/api-test", icon: "pulse" },
+  { key: "orders", label: "Orders", href: "#/orders", icon: "orders" },
+  { key: "inventory", label: "Inventory", href: "#/inventory", icon: "inventory" },
+  { key: "reports", label: "Reports", href: "#/reports", icon: "reports" },
+  { key: "logs", label: "Logs", href: "#/logs", icon: "logs" },
 ];
 
 const PAGE_META = {
@@ -28,6 +35,12 @@ const PAGE_META = {
     title: "Orders Workspace",
     description:
       "Inspect live orders, run sandbox sync tests, and validate API responses without leaving the operations console.",
+  },
+  "api-test": {
+    eyebrow: "Service Health",
+    title: "API Test Console",
+    description:
+      "Run direct platform health checks and inspect the current API response payload from the dedicated test workspace.",
   },
   inventory: {
     eyebrow: "Stock Visibility",
@@ -58,6 +71,11 @@ function getCurrentRoute() {
 
 function App() {
   const [activeRoute, setActiveRoute] = useState(getCurrentRoute);
+  const [theme, setTheme] = useState(() => {
+    const savedTheme = window.localStorage.getItem("amzops-theme");
+
+    return savedTheme === THEMES.dark ? THEMES.dark : THEMES.white;
+  });
 
   useEffect(() => {
     function handleHashChange() {
@@ -75,11 +93,21 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("amzops-theme", theme);
+  }, [theme]);
+
   return (
     <div className="app-frame">
       <Sidebar items={NAV_ITEMS} activeRoute={activeRoute} />
       <div className="content-shell">
-        <PageHeader {...PAGE_META[activeRoute]} />
+        <PageHeader
+          {...PAGE_META[activeRoute]}
+          activeRouteLabel={getRouteLabel(activeRoute)}
+          theme={theme}
+          onThemeChange={setTheme}
+        />
         <div className="content-grid">{renderPage(activeRoute)}</div>
       </div>
     </div>
@@ -92,6 +120,8 @@ function renderPage(route) {
       return <OrdersPage />;
     case "inventory":
       return <InventoryPage />;
+    case "api-test":
+      return <ApiTestPage />;
     case "reports":
       return <ReportsPage />;
     case "logs":
@@ -100,6 +130,10 @@ function renderPage(route) {
     default:
       return <DashboardPage />;
   }
+}
+
+function getRouteLabel(route) {
+  return NAV_ITEMS.find((item) => item.key === route)?.label || "Dashboard";
 }
 
 export default App;
