@@ -1,11 +1,9 @@
 :root {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: #172033;
-  background:
-    radial-gradient(circle at top right, rgba(255, 202, 88, 0.32), transparent 32%),
-    linear-gradient(180deg, #eef3fb 0%, #f8fafc 100%);
+  color: #111827;
+  background: #f9fafb;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -16,23 +14,45 @@
   box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
   min-width: 320px;
+  min-height: 100vh;
+}
+
+body {
+  background:
+    radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 22%),
+    linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
 }
 
 button {
   border: 0;
-  border-radius: 999px;
-  padding: 12px 18px;
+  border-radius: 10px;
+  padding: 12px 16px;
   font: inherit;
   font-weight: 700;
   color: #ffffff;
-  background: #1f6feb;
+  background: #2563eb;
   cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 button:disabled {
   opacity: 0.7;
   cursor: progress;
+}
+
+a {
+  color: inherit;
 }
