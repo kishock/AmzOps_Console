@@ -54,7 +54,7 @@ function ApiTestPage() {
         <article className="panel-card">
           <div className="card-heading-row">
             <h3>Health Summary</h3>
-            <span className="inline-badge">/health</span>
+            <span className="inline-badge">/dashboard/health</span>
           </div>
           <div className="detail-grid api-detail-grid">
             <DetailItem

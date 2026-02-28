@@ -102,12 +102,7 @@ function App() {
     <div className="app-frame">
       <Sidebar items={NAV_ITEMS} activeRoute={activeRoute} />
       <div className="content-shell">
-        <PageHeader
-          {...PAGE_META[activeRoute]}
-          activeRouteLabel={getRouteLabel(activeRoute)}
-          theme={theme}
-          onThemeChange={setTheme}
-        />
+        <PageHeader {...PAGE_META[activeRoute]} theme={theme} onThemeChange={setTheme} />
         <div className="content-grid">{renderPage(activeRoute)}</div>
       </div>
     </div>
@@ -130,10 +125,6 @@ function renderPage(route) {
     default:
       return <DashboardPage />;
   }
-}
-
-function getRouteLabel(route) {
-  return NAV_ITEMS.find((item) => item.key === route)?.label || "Dashboard";
 }
 
 export default App;

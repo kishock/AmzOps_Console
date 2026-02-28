@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "./orders";
 
-export const HEALTH_ENDPOINT = `${API_BASE_URL.replace(/\/$/, "")}/health`;
+export const HEALTH_ENDPOINT = `${API_BASE_URL.replace(/\/$/, "")}/dashboard/health`;
 
 export async function fetchHealthStatus() {
   const startedAt = performance.now();

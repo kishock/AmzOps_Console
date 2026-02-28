@@ -342,6 +342,14 @@
   justify-content: space-between;
 }
 
+.toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 .actions {
   flex-wrap: wrap;
   margin-top: 16px;
@@ -488,6 +496,10 @@
   color: var(--error);
 }
 
+.feedback.success-text {
+  color: var(--success);
+}
+
 .order-list {
   display: grid;
   gap: 14px;
@@ -551,6 +563,15 @@ code {
   background: var(--surface-hover);
   color: var(--text-primary);
   transform: none;
+}
+
+.danger-button {
+  background: var(--error);
+  color: #ffffff;
+}
+
+.danger-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--error) 86%, black);
 }
 
 .orders-table-shell {
@@ -839,6 +860,11 @@ code {
   .header-status {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .side-nav {

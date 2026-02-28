@@ -36,6 +36,30 @@ export async function fetchOrders() {
   };
 }
 
+export async function deleteAllOrders() {
+  const response = await fetch(ORDERS_ENDPOINT, {
+    method: "DELETE",
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const payload = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
+
+  if (!response.ok) {
+    throw new Error(
+      `Request failed with ${response.status}: ${
+        typeof payload === "string" ? payload : JSON.stringify(payload)
+      }`,
+    );
+  }
+
+  return {
+    status: response.status,
+    data: payload,
+  };
+}
+
 export async function triggerSandboxOrder(method = "POST") {
   const response = await fetch(SYNC_SANDBOX_ENDPOINT, {
     method,

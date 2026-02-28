@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  deleteAllOrders,
   fetchOrders,
   ORDERS_ENDPOINT,
   SYNC_SANDBOX_ENDPOINT,
@@ -13,26 +14,69 @@ const ORDER_VIEWS = {
 
 function OrdersPage() {
   const [view, setView] = useState(ORDER_VIEWS.list);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [toolbarMessage, setToolbarMessage] = useState("");
+  const [toolbarError, setToolbarError] = useState("");
+  const [isClearing, setIsClearing] = useState(false);
+
+  async function handleClearOrders() {
+    const shouldDelete = window.confirm(
+      "Delete all order data from the order table? This action cannot be undone.",
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsClearing(true);
+    setToolbarError("");
+    setToolbarMessage("");
+
+    try {
+      await deleteAllOrders();
+      setRefreshKey((current) => current + 1);
+      setToolbarMessage("All order data has been deleted.");
+    } catch (requestError) {
+      setToolbarMessage("");
+      setToolbarError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unknown error while deleting order data.",
+      );
+    } finally {
+      setIsClearing(false);
+    }
+  }
 
   return (
     <>
       <section className="panel-card">
         <div className="card-heading-row">
           <h3>Orders Tools</h3>
-          <div className="segmented-control" role="tablist" aria-label="Orders views">
+          <div className="toolbar-actions">
+            <div className="segmented-control" role="tablist" aria-label="Orders views">
+              <button
+                type="button"
+                className={view === ORDER_VIEWS.list ? "tab-button active" : "tab-button"}
+                onClick={() => setView(ORDER_VIEWS.list)}
+              >
+                Orders API
+              </button>
+              <button
+                type="button"
+                className={view === ORDER_VIEWS.sync ? "tab-button active" : "tab-button"}
+                onClick={() => setView(ORDER_VIEWS.sync)}
+              >
+                Sync Sandbox
+              </button>
+            </div>
             <button
               type="button"
-              className={view === ORDER_VIEWS.list ? "tab-button active" : "tab-button"}
-              onClick={() => setView(ORDER_VIEWS.list)}
+              className="danger-button"
+              onClick={handleClearOrders}
+              disabled={isClearing}
             >
-              Orders API
-            </button>
-            <button
-              type="button"
-              className={view === ORDER_VIEWS.sync ? "tab-button active" : "tab-button"}
-              onClick={() => setView(ORDER_VIEWS.sync)}
-            >
-              Sync Sandbox
+              {isClearing ? "Deleting..." : "Order Table 초기화"}
             </button>
           </div>
         </div>
@@ -40,14 +84,20 @@ function OrdersPage() {
           The orders workspace is optimized for operational review with a table-first
           layout and a structured detail panel.
         </p>
+        {toolbarMessage ? <p className="feedback success-text">{toolbarMessage}</p> : null}
+        {toolbarError ? <p className="feedback error-text">Error: {toolbarError}</p> : null}
       </section>
 
-      {view === ORDER_VIEWS.sync ? <SyncSandboxSection /> : <OrdersApiSection />}
+      {view === ORDER_VIEWS.sync ? (
+        <SyncSandboxSection refreshKey={refreshKey} />
+      ) : (
+        <OrdersApiSection refreshKey={refreshKey} />
+      )}
     </>
   );
 }
 
-function OrdersApiSection() {
+function OrdersApiSection({ refreshKey }) {
   const [orders, setOrders] = useState([]);
   const [rawResponse, setRawResponse] = useState(null);
   const [error, setError] = useState("");
@@ -84,7 +134,7 @@ function OrdersApiSection() {
 
   useEffect(() => {
     loadOrders();
-  }, []);
+  }, [refreshKey]);
 
   const selectedOrder =
     orders.find(
@@ -176,13 +226,21 @@ function OrdersApiSection() {
   );
 }
 
-function SyncSandboxSection() {
+function SyncSandboxSection({ refreshKey }) {
   const [responseData, setResponseData] = useState(null);
   const [latestOrders, setLatestOrders] = useState([]);
   const [error, setError] = useState("");
   const [statusCode, setStatusCode] = useState(null);
   const [lastMethod, setLastMethod] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setResponseData(null);
+    setLatestOrders([]);
+    setError("");
+    setStatusCode(null);
+    setLastMethod("");
+  }, [refreshKey]);
 
   async function runSandboxSync(method) {
     setIsLoading(true);
@@ -228,14 +286,6 @@ function SyncSandboxSection() {
             disabled={isLoading}
           >
             {isLoading && lastMethod === "POST" ? "Running POST..." : "Run POST"}
-          </button>
-          <button
-            type="button"
-            className="secondary-button"
-            onClick={() => runSandboxSync("GET")}
-            disabled={isLoading}
-          >
-            {isLoading && lastMethod === "GET" ? "Running GET..." : "Run GET"}
           </button>
         </div>
         <p className="helper-text">

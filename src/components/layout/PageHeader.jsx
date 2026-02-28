@@ -2,7 +2,6 @@ function PageHeader({
   eyebrow,
   title,
   description,
-  activeRouteLabel,
   theme,
   onThemeChange,
 }) {
@@ -14,10 +13,6 @@ function PageHeader({
         <p className="page-description">{description}</p>
       </div>
       <div className="header-status">
-        <span className="status-pill">View: {activeRouteLabel}</span>
-        <span className="status-pill">
-          Theme: {theme === "dark" ? "Dark" : "White"}
-        </span>
         <button
           type="button"
           className={theme === "dark" ? "theme-switch dark" : "theme-switch"}
