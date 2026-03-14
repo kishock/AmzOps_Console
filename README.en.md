@@ -22,10 +22,12 @@ The image below is a README preview that shows the current UI structure.
   - Displays KPIs, status distribution, recent orders, and data-quality warnings based on Orders API data.
 - `Orders`
   - Provides an order table, detail panel, sandbox sync, and delete-all-orders action.
+- `Inventory`
+  - Provides an inventory list, status filters, stock adjustments, transaction ledger, and negative-stock validation.
+- `Warehouse Tasks`
+  - Provides a warehouse task queue, status filters, next-step action buttons, and progress indicators.
 - `API Test`
   - Calls the backend health endpoint (`/dashboard/health`) directly to check service status.
-- `Inventory`, `Reports`, `Logs`
-  - Provides enterprise-style placeholder modules for future expansion.
 - `White / Dark` Theme
   - Switches global theme from the top toggle and stores preference in local storage.
 
@@ -49,7 +51,9 @@ amzops_console/
 ├─ src/
 │  ├─ api/
 │  │  ├─ health.js
-│  │  └─ orders.js
+│  │  ├─ inventory.js
+│  │  ├─ orders.js
+│  │  └─ warehouse.js
 │  ├─ components/
 │  │  └─ layout/
 │  │     ├─ PageHeader.jsx
@@ -61,12 +65,10 @@ amzops_console/
 │  │  │  └─ DashboardPage.jsx
 │  │  ├─ Inventory/
 │  │  │  └─ InventoryPage.jsx
-│  │  ├─ Logs/
-│  │  │  └─ LogsPage.jsx
 │  │  ├─ Orders/
 │  │  │  └─ OrdersPage.jsx
-│  │  └─ Reports/
-│  │     └─ ReportsPage.jsx
+│  │  └─ Warehouse/
+│  │     └─ WarehousePage.jsx
 │  ├─ App.css
 │  ├─ App.jsx
 │  ├─ index.css
@@ -99,6 +101,13 @@ Backend communication layer.
   - Runs sandbox sync
   - Deletes all orders
   - Manages common API base URL
+- `inventory.js`
+  - Fetches inventory list
+  - Fetches inventory transaction ledger
+  - Submits stock adjustments
+- `warehouse.js`
+  - Fetches warehouse task list
+  - Updates warehouse task status
 - `health.js`
   - Calls `/dashboard/health`
   - Measures response time (ms)
@@ -120,10 +129,12 @@ Feature-based page modules.
   - Operations dashboard based on order data
 - `Orders`
   - Order table, detail panel, delete/sync actions
+- `Inventory`
+  - Inventory list, stock adjustment form, transaction ledger
+- `Warehouse`
+  - Warehouse task flow, next-step actions, progress tracking
 - `ApiTest`
   - Health-check test page
-- `Inventory`, `Reports`, `Logs`
-  - Enterprise-style extension pages
 
 ### `src/App.css`
 
@@ -204,8 +215,7 @@ Supported routes:
 - `#/api-test`
 - `#/orders`
 - `#/inventory`
-- `#/reports`
-- `#/logs`
+- `#/warehouse`
 
 If no hash is provided, `#/dashboard` opens by default.
 
@@ -224,6 +234,16 @@ Used endpoints:
 - `POST /orders/delete-all`
   - Delete all orders
   - If response is `405`, retries once with `DELETE /orders/delete-all`
+- `GET /inventory/`
+  - Fetch inventory list
+- `GET /inventory/transactions?sku=<SKU>&limit=100`
+  - Fetch the selected SKU ledger
+- `POST /inventory/adjust`
+  - Submit a stock adjustment
+- `GET /warehouse/tasks`
+  - Fetch warehouse task list
+- `POST /warehouse/tasks/{task_id}/status`
+  - Advance a warehouse task to the next status
 - `GET /dashboard/health`
   - API health check
 
@@ -370,6 +390,73 @@ Rendering rules:
 - `Amount` -> `Amount`
 - USD amount -> `$101.23` format
 - Dates -> formatted into human-readable text
+
+## Inventory Screen
+
+The Inventory page is an operations workspace for stock visibility and stock adjustments.
+
+Included features:
+
+- Status filters
+  - `ALL / OK / LOW / OUT`
+- Search by SKU or product name
+- Selected-row highlight
+- `Inventory Adjustment`
+  - Fixed selected SKU
+  - Quantity, Type, Reason, Approved By inputs
+  - Zero-quantity prevention
+  - Negative-stock prevention
+- `Inventory Transaction Ledger`
+  - Date/time, type, quantity, ending quantity, reference number, and reason
+  - Pagination in groups of 5 rows
+
+### Inventory Adjustment Flow
+
+When `Submit Adjustment` is clicked:
+
+1. The UI validates that `quantity` is not 0
+2. The UI validates that the adjustment will not create negative inventory
+3. `POST /inventory/adjust` is called
+4. On success, both inventory and the ledger are refreshed
+
+## Warehouse Tasks Screen
+
+The Warehouse Tasks page is a workflow table for moving warehouse tasks from picking to shipping.
+
+Included features:
+
+- Status filters
+  - `All / Ready / Picking / Picked / Packing / Shipped`
+- Operations table
+  - Task ID
+  - Order No
+  - SKU
+  - Product
+  - Qty
+  - Picker
+  - Location
+  - Status
+  - Updated At
+  - Action
+- Status badge and progress indicator
+- Next-step action button only for the current valid transition
+
+### Warehouse Task Status Transitions
+
+- `READY` -> `Start Picking`
+- `PICKING` -> `Mark Picked`
+- `PICKED` -> `Start Packing`
+- `PACKING` -> `Mark Shipped`
+- `SHIPPED` -> `Completed`
+
+### Warehouse Task Update Flow
+
+When an action button is clicked:
+
+1. `POST /warehouse/tasks/{task_id}/status`
+2. The next status is sent in the request body
+3. On success, the row status and update time are refreshed immediately
+4. A success message is shown at the top of the page
 
 ## API Test Screen
 

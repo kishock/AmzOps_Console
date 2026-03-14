@@ -22,10 +22,12 @@ Amazon Ops Console은 Amazon 주문 운영 데이터를 조회하고, API 상태
   - Orders API 데이터를 기반으로 KPI, 상태 분포, 최근 주문, 데이터 품질 경고를 표시합니다.
 - `Orders`
   - 주문 테이블, 상세 패널, 샌드박스 동기화, 전체 주문 삭제 기능을 제공합니다.
+- `Inventory`
+  - 인벤토리 리스트, 상태 필터, 재고 조정, 거래 원장, 음수 재고 방지 검증 기능을 제공합니다.
+- `Warehouse Tasks`
+  - 창고 작업 목록, 상태별 필터, 다음 단계 액션 버튼, 상태 진행 표시를 제공합니다.
 - `API Test`
   - 백엔드 헬스체크 엔드포인트(`/dashboard/health`)를 직접 호출하여 상태를 확인합니다.
-- `Inventory`, `Reports`, `Logs`
-  - 향후 확장을 위한 엔터프라이즈형 모듈 화면을 제공합니다.
 - `White / Dark` 테마
   - 상단 토글로 전역 테마를 전환하며, 선택값은 로컬 스토리지에 저장됩니다.
 
@@ -49,7 +51,9 @@ amzops_console/
 ├─ src/
 │  ├─ api/
 │  │  ├─ health.js
-│  │  └─ orders.js
+│  │  ├─ inventory.js
+│  │  ├─ orders.js
+│  │  └─ warehouse.js
 │  ├─ components/
 │  │  └─ layout/
 │  │     ├─ PageHeader.jsx
@@ -61,12 +65,10 @@ amzops_console/
 │  │  │  └─ DashboardPage.jsx
 │  │  ├─ Inventory/
 │  │  │  └─ InventoryPage.jsx
-│  │  ├─ Logs/
-│  │  │  └─ LogsPage.jsx
 │  │  ├─ Orders/
 │  │  │  └─ OrdersPage.jsx
-│  │  └─ Reports/
-│  │     └─ ReportsPage.jsx
+│  │  └─ Warehouse/
+│  │     └─ WarehousePage.jsx
 │  ├─ App.css
 │  ├─ App.jsx
 │  ├─ index.css
@@ -99,6 +101,13 @@ amzops_console/
   - 샌드박스 동기화 실행
   - 전체 주문 삭제
   - 공통 API Base URL 관리
+- `inventory.js`
+  - 인벤토리 목록 조회
+  - 거래 원장 조회
+  - 재고 조정 요청 전송
+- `warehouse.js`
+  - 창고 작업 목록 조회
+  - 작업 상태 업데이트
 - `health.js`
   - `/dashboard/health` 호출
   - 응답 시간(ms) 측정
@@ -120,10 +129,12 @@ amzops_console/
   - 주문 데이터 기반 운영 대시보드
 - `Orders`
   - 주문 테이블, 상세 패널, 삭제/동기화 기능
+- `Inventory`
+  - 재고 리스트, 상태 필터, 조정 입력, 거래 원장
+- `Warehouse`
+  - 창고 작업 상태 관리, 다음 단계 액션, 진행 상태 표시
 - `ApiTest`
   - 헬스체크 테스트 페이지
-- `Inventory`, `Reports`, `Logs`
-  - 확장용 엔터프라이즈 화면
 
 ### `src/App.css`
 
@@ -204,8 +215,7 @@ amzops_console/
 - `#/api-test`
 - `#/orders`
 - `#/inventory`
-- `#/reports`
-- `#/logs`
+- `#/warehouse`
 
 해시가 없으면 기본값으로 `#/dashboard`가 열립니다.
 
@@ -224,6 +234,16 @@ amzops_console/
 - `POST /orders/delete-all`
   - 전체 주문 삭제
   - `405` 응답 시 `DELETE /orders/delete-all`로 한 번 더 시도
+- `GET /inventory/`
+  - 전체 인벤토리 조회
+- `GET /inventory/transactions?sku=<SKU>&limit=100`
+  - 선택 SKU 거래 원장 조회
+- `POST /inventory/adjust`
+  - 재고 조정 요청
+- `GET /warehouse/tasks`
+  - 창고 작업 목록 조회
+- `POST /warehouse/tasks/{task_id}/status`
+  - 작업 상태를 다음 단계로 전환
 - `GET /dashboard/health`
   - API 헬스체크
 
@@ -372,6 +392,73 @@ Orders 페이지는 운영자가 가장 자주 사용하는 메인 작업 화면
 - `Amount` → `Amount`
 - USD 금액 → `$101.23` 형식
 - 날짜 → 읽기 쉬운 형식으로 포맷
+
+## Inventory 화면 구성
+
+Inventory 페이지는 재고 조회와 조정 작업을 함께 처리하는 운영 화면입니다.
+
+포함 기능:
+
+- 상태 필터
+  - `ALL / OK / LOW / OUT`
+- SKU 또는 상품명 검색
+- 선택 행 강조
+- `Inventory Adjustment`
+  - SKU 고정 표시
+  - Quantity, Type, Reason, Approved By 입력
+  - 수량 0 방지
+  - 음수 재고 방지
+- `Inventory Transaction Ledger`
+  - 날짜/시간, 타입, 수량, 결과재고, 참조번호, 사유 표시
+  - 5건 단위 페이지네이션
+
+### 인벤토리 조정 동작
+
+`Submit Adjustment` 클릭 시:
+
+1. `quantity`가 0인지 확인
+2. 조정 후 재고가 음수가 되는지 확인
+3. `POST /inventory/adjust` 호출
+4. 성공 시 인벤토리와 거래 원장을 다시 갱신
+
+## Warehouse Tasks 화면 구성
+
+Warehouse Tasks 페이지는 창고 작업 진행 상태를 단계별로 관리하는 작업 테이블입니다.
+
+포함 기능:
+
+- 상태 필터
+  - `All / Ready / Picking / Picked / Packing / Shipped`
+- 작업 테이블
+  - Task ID
+  - Order No
+  - SKU
+  - Product
+  - Qty
+  - Picker
+  - Location
+  - Status
+  - Updated At
+  - Action
+- 상태 배지 + 진행 표시
+- 현재 상태에 맞는 다음 단계 액션 버튼만 표시
+
+### 창고 작업 상태 전이
+
+- `READY` → `Start Picking`
+- `PICKING` → `Mark Picked`
+- `PICKED` → `Start Packing`
+- `PACKING` → `Mark Shipped`
+- `SHIPPED` → `Completed`
+
+### 창고 작업 업데이트 동작
+
+액션 버튼 클릭 시:
+
+1. `POST /warehouse/tasks/{task_id}/status`
+2. body에 다음 상태값 전달
+3. 성공 시 현재 행 상태와 업데이트 시간을 즉시 반영
+4. 상단에 성공 메시지 표시
 
 ## API Test 화면 구성
 
