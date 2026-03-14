@@ -7,19 +7,21 @@ import DashboardPage from "./pages/Dashboard/DashboardPage";
 import InventoryPage from "./pages/Inventory/InventoryPage";
 import LogsPage from "./pages/Logs/LogsPage";
 import OrdersPage from "./pages/Orders/OrdersPage";
-import ReportsPage from "./pages/Reports/ReportsPage";
+import WarehousePage from "./pages/Warehouse/WarehousePage";
 
 const THEMES = {
   white: "white",
   dark: "dark",
 };
 
+const SIDEBAR_STATE_KEY = "amzops-sidebar-collapsed";
+
 const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", href: "#/dashboard", icon: "grid" },
   { key: "api-test", label: "API Test", href: "#/api-test", icon: "pulse" },
   { key: "orders", label: "Orders", href: "#/orders", icon: "orders" },
   { key: "inventory", label: "Inventory", href: "#/inventory", icon: "inventory" },
-  { key: "reports", label: "Reports", href: "#/reports", icon: "reports" },
+  { key: "warehouse", label: "Warehouse Tasks", href: "#/warehouse", icon: "reports" },
   { key: "logs", label: "Logs", href: "#/logs", icon: "logs" },
 ];
 
@@ -44,15 +46,15 @@ const PAGE_META = {
   },
   inventory: {
     eyebrow: "Stock Visibility",
-    title: "Inventory Snapshot",
+    title: "Inventory Overview",
     description:
       "Track on-hand units, replenishment pressure, and SKU health using a clean operational summary.",
   },
-  reports: {
-    eyebrow: "Business Reporting",
-    title: "Performance Reports",
+  warehouse: {
+    eyebrow: "Warehouse Floor",
+    title: "Warehouse Tasks",
     description:
-      "Review revenue, service levels, and trend indicators in a restrained executive reporting layout.",
+      "Coordinate receiving, picking, replenishment, and exception handling from a dedicated warehouse workspace.",
   },
   logs: {
     eyebrow: "Audit Trail",
@@ -76,6 +78,9 @@ function App() {
 
     return savedTheme === THEMES.dark ? THEMES.dark : THEMES.white;
   });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    return window.sessionStorage.getItem(SIDEBAR_STATE_KEY) === "true";
+  });
 
   useEffect(() => {
     function handleHashChange() {
@@ -98,9 +103,21 @@ function App() {
     window.localStorage.setItem("amzops-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      SIDEBAR_STATE_KEY,
+      isSidebarCollapsed ? "true" : "false",
+    );
+  }, [isSidebarCollapsed]);
+
   return (
-    <div className="app-frame">
-      <Sidebar items={NAV_ITEMS} activeRoute={activeRoute} />
+    <div className={isSidebarCollapsed ? "app-frame sidebar-collapsed" : "app-frame"}>
+      <Sidebar
+        items={NAV_ITEMS}
+        activeRoute={activeRoute}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
+      />
       <div className="content-shell">
         <PageHeader {...PAGE_META[activeRoute]} theme={theme} onThemeChange={setTheme} />
         <div className="content-grid">{renderPage(activeRoute)}</div>
@@ -117,8 +134,8 @@ function renderPage(route) {
       return <InventoryPage />;
     case "api-test":
       return <ApiTestPage />;
-    case "reports":
-      return <ReportsPage />;
+    case "warehouse":
+      return <WarehousePage />;
     case "logs":
       return <LogsPage />;
     case "dashboard":
@@ -128,3 +145,7 @@ function renderPage(route) {
 }
 
 export default App;
+
+
+
+
