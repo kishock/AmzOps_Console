@@ -306,7 +306,7 @@ function InventoryPage() {
             <span className="inline-badge">POST</span>
           </div>
           <p className="card-copy compact">
-            Writes to <code>/api/inventory/adjust</code>.
+            Writes to <code>{INVENTORY_ADJUSTMENT_ENDPOINTS[0]}</code>.
           </p>
           {selectedItem ? (
             <form className="inventory-adjustment-form" onSubmit={handleSubmitAdjustment}>
@@ -400,7 +400,7 @@ function InventoryPage() {
           <span className="inline-badge">{ledgerEntries.length} records</span>
         </div>
         <p className="card-copy compact">
-          Reads from <code>/api/inventory/transactions?sku=SELECTED_SKU&limit=100</code>.
+          Reads from <code>{INVENTORY_LEDGER_ENDPOINT}?sku=SELECTED_SKU&limit=100</code>.
         </p>
         {ledgerError ? <p className="feedback error-text">Error: {ledgerError}</p> : null}
         {ledgerEntries.length > 0 ? (
@@ -602,6 +602,7 @@ function formatLedgerTime(entry) {
 }
 
 export default InventoryPage;
+
 
 
 

@@ -1,13 +1,12 @@
 import { API_BASE_URL } from "./orders";
 
 const INVENTORY_BASE = `${API_BASE_URL.replace(/\/$/, "")}/inventory/`;
-const LOCAL_INVENTORY_BASE = "/api/inventory";
 
 export const INVENTORY_ENDPOINT = INVENTORY_BASE;
 export const INVENTORY_ADJUSTMENT_ENDPOINTS = [
-  "/api/inventory/adjust",
+  `${API_BASE_URL.replace(/\/$/, "")}/inventory/adjust`,
 ];
-export const INVENTORY_LEDGER_ENDPOINT = `${LOCAL_INVENTORY_BASE}/transactions`;
+export const INVENTORY_LEDGER_ENDPOINT = `${API_BASE_URL.replace(/\/$/, "")}/inventory/transactions`;
 
 export async function fetchInventory() {
   const response = await fetch(INVENTORY_ENDPOINT);
@@ -142,5 +141,6 @@ function formatRequestError(status, payload) {
     typeof payload === "string" ? payload : JSON.stringify(payload)
   }`;
 }
+
 
 
