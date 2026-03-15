@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { fetchInventory } from "../../api/inventory";
 import { fetchOrders } from "../../api/orders";
 
 function DashboardPage() {
   const [orders, setOrders] = useState([]);
+  const [inventoryItems, setInventoryItems] = useState([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -14,14 +16,19 @@ function DashboardPage() {
       setError("");
 
       try {
-        const result = await fetchOrders();
+        const [ordersResult, inventoryResult] = await Promise.all([
+          fetchOrders(),
+          fetchInventory(),
+        ]);
 
         if (active) {
-          setOrders(result.orders);
+          setOrders(ordersResult.orders);
+          setInventoryItems(inventoryResult.inventory);
         }
       } catch (requestError) {
         if (active) {
           setOrders([]);
+          setInventoryItems([]);
           setError(
             requestError instanceof Error
               ? requestError.message
@@ -54,6 +61,9 @@ function DashboardPage() {
   const latestSyncCount = countOrdersBySyncTime(orders, latestSync);
   const invalidPurchaseDates = orders.filter(hasInvalidPurchaseDate);
   const statusSegments = buildStatusSegments(orders);
+  const totalInventory = inventoryItems.length;
+  const lowStockCount = countInventoryByStatus(inventoryItems, "LOW");
+  const outOfStockCount = countInventoryByStatus(inventoryItems, "OUT");
 
   return (
     <>
@@ -79,6 +89,23 @@ function DashboardPage() {
       </section>
 
       {error ? <p className="feedback error-text">Error: {error}</p> : null}
+
+      <section className="stats-grid">
+        <article className="panel-card stat-card compact-stat">
+          <p className="card-label">Inventory</p>
+          <strong className="card-value primary">{totalInventory}</strong>
+        </article>
+        <article className="panel-card stat-card compact-stat">
+          <p className="card-label">Stock Visibility</p>
+          <strong className="card-value">
+            {totalInventory > 0 ? `${totalInventory - outOfStockCount} visible` : "Unavailable"}
+          </strong>
+        </article>
+        <article className="panel-card stat-card compact-stat">
+          <p className="card-label">Low Stock</p>
+          <strong className="card-value danger">{lowStockCount}</strong>
+        </article>
+      </section>
 
       <section className="two-column-grid">
         <article className="panel-card">
@@ -244,6 +271,12 @@ function DashboardPage() {
 function countByStatus(orders, status) {
   return orders.filter(
     (order) => getNormalizedStatus(order.order_status) === status,
+  ).length;
+}
+
+function countInventoryByStatus(items, status) {
+  return items.filter(
+    (item) => String(item.status || "").trim().toUpperCase() === status,
   ).length;
 }
 
@@ -437,3 +470,4 @@ function formatRelativeTime(value) {
 }
 
 export default DashboardPage;
+

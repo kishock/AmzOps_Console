@@ -1,6 +1,19 @@
-function Sidebar({ items, activeRoute }) {
+function Sidebar({ items, activeRoute, isCollapsed, onToggleCollapse }) {
   return (
-    <aside className="sidebar">
+    <aside className={isCollapsed ? "sidebar collapsed" : "sidebar"}>
+      <div className="sidebar-top-row">
+        <button
+          type="button"
+          className="sidebar-toggle"
+          onClick={onToggleCollapse}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-pressed={isCollapsed}
+        >
+          <span className="sidebar-toggle-bar" />
+          <span className="sidebar-toggle-bar" />
+          <span className="sidebar-toggle-bar" />
+        </button>
+      </div>
       <div className="brand-block">
         <div className="brand-mark" aria-hidden="true">
           <span className="brand-mark-badge">
@@ -32,11 +45,12 @@ function Sidebar({ items, activeRoute }) {
             key={item.key}
             href={item.href}
             className={activeRoute === item.key ? "nav-link active" : "nav-link"}
+            title={isCollapsed ? item.label : undefined}
           >
             <span className={`nav-icon nav-icon-${item.icon}`} aria-hidden="true">
               {getNavIcon(item.icon)}
             </span>
-            {item.label}
+            <span className="nav-link-label">{item.label}</span>
           </a>
         ))}
       </nav>
@@ -76,6 +90,14 @@ function getNavIcon(icon) {
           <path d="M8 9h8M8 13h8M8 17h5" />
         </svg>
       );
+    case "inbound":
+      return (
+        <svg {...commonProps}>
+          <path d="M12 4v10" />
+          <path d="m8 10 4 4 4-4" />
+          <path d="M5 19h14" />
+        </svg>
+      );
     case "inventory":
       return (
         <svg {...commonProps}>
@@ -110,3 +132,4 @@ function getNavIcon(icon) {
 }
 
 export default Sidebar;
+

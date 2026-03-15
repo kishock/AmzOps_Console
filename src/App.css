@@ -1291,6 +1291,18 @@ code {
   border-color: var(--primary);
 }
 
+.inventory-field input[type="date"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] .inventory-field input[type="date"] {
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] .inventory-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.15);
+}
+
 .inventory-readonly-input {
   border: 2px solid #dc2626;
   background: #fef2f2;
@@ -1541,6 +1553,500 @@ code {
   letter-spacing: 0.03em;
 }
 
+
+
+
+
+.inbound-toolbar,
+.inbound-filter-row,
+.inbound-select-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.inbound-toolbar,
+.inbound-filter-row {
+  margin-top: 16px;
+  justify-content: space-between;
+}
+
+.inbound-search {
+  flex: 1 1 320px;
+}
+
+.inbound-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.inbound-list-panel,
+.inbound-layout .detail-column,
+.inbound-layout .panel-card {
+  min-width: 0;
+}
+
+.inbound-create-shell,
+.inbound-progress-shell {
+  margin-top: 18px;
+}
+
+.inbound-create-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.inbound-filter-field {
+  min-width: 160px;
+}
+
+.inbound-textarea {
+  min-height: 88px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+  resize: vertical;
+}
+
+.inbound-items-shell {
+  min-width: 0;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.inbound-items-head,
+.inbound-create-item-row,
+.inbound-detail-item-row,
+.inbound-checking-row,
+.inbound-putaway-row,
+.inbound-table-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 16px;
+}
+
+.inbound-items-head {
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--border);
+}
+
+.inbound-items-head span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.inbound-create-item-row {
+  grid-template-columns: minmax(110px, 0.9fr) minmax(180px, 1.6fr) minmax(110px, 0.9fr) minmax(70px, 0.6fr);
+  border-top: 1px solid var(--border);
+}
+
+.inbound-detail-item-row {
+  grid-template-columns: minmax(100px, 0.9fr) minmax(180px, 1.5fr) minmax(84px, 0.7fr) minmax(72px, 0.55fr) minmax(84px, 0.7fr) minmax(84px, 0.7fr) minmax(96px, 0.8fr);
+  min-width: 820px;
+  width: max-content;
+  border-top: 1px solid var(--border);
+}
+
+.inbound-checking-row {
+  grid-template-columns: minmax(100px, 0.9fr) minmax(180px, 1.5fr) minmax(90px, 0.8fr) minmax(90px, 0.8fr) minmax(90px, 0.8fr);
+  min-width: 700px;
+  width: max-content;
+  border-top: 1px solid var(--border);
+}
+
+.inbound-putaway-row {
+  grid-template-columns: 108px 156px 82px 90px 120px 76px 82px;
+  min-width: 714px;
+  width: max-content;
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+}
+
+.inbound-table-shell {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.inbound-table-row {
+  grid-template-columns: minmax(110px, 1fr) minmax(130px, 1.15fr) minmax(100px, 0.9fr) minmax(108px, 0.95fr) minmax(70px, 0.6fr) minmax(70px, 0.6fr);
+  min-width: 760px;
+}
+
+.inbound-table-shell > .inbound-table-row,
+.inbound-table-shell > .inbound-table-body {
+  width: max-content;
+  min-width: 100%;
+}
+
+.inbound-table-body {
+  max-height: min(56vh, 760px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.inbound-items-shell input,
+.inbound-items-shell textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.inbound-items-shell select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.inbound-items-shell select:focus {
+  outline: 2px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  outline-offset: 0;
+  border-color: var(--primary);
+}
+
+.inbound-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.inbound-status-badge.draft,
+.inbound-status-badge.scheduled {
+  border-color: var(--warning-border);
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+
+.inbound-status-badge.arrived,
+.inbound-status-badge.checking,
+.inbound-status-badge.putaway {
+  border-color: var(--border-blue);
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: var(--primary);
+}
+
+.inbound-status-badge.completed {
+  border-color: var(--success-border);
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.inbound-progress-bar {
+  margin-top: 12px;
+}
+
+.inbound-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.inbound-summary-grid > div {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+}
+
+.inbound-inline-button {
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.inbound-variance-box {
+  margin-top: 14px;
+}
+
+@media (max-width: 1200px) {
+  .inbound-layout,
+  .inbound-create-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .inbound-table-row,
+  .inbound-create-item-row,
+  .inbound-detail-item-row,
+  .inbound-checking-row,
+  .inbound-putaway-row {
+    min-width: 760px;
+  }
+
+  .inbound-summary-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+
+
+
+
+.inventory-row-button .inbound-table-shell {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.inbound-table-row {
+  padding: 0;
+}
+
+.inbound-table-body .inventory-row-button {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+
+
+
+
+
+
+.inbound-table-body {
+  overflow-y: auto;
+  overflow-x: visible;
+}
+
+
+
+/* Inbound list table alignment */
+.inbound-table-shell {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.inbound-table-shell > .inventory-ledger-head.inbound-table-row,
+.inbound-table-shell > .inbound-table-body {
+  min-width: 100%;
+  width: max-content;
+}
+
+.inbound-table-body {
+  max-height: min(56vh, 760px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.inbound-table-body .inventory-row-button {
+  display: block;
+  min-width: 100%;
+  width: max-content;
+}
+
+.inventory-row-button .inbound-table-row {
+  padding: 9px 16px;
+}
+
+
+
+.inbound-table-shell .inbound-table-row {
+  justify-items: start;
+}
+
+.inbound-table-shell .inbound-table-row > span {
+  text-align: left;
+}
+
+.inbound-table-body .inventory-row-button {
+  padding: 0;
+}
+
+.inventory-row-button .inbound-table-row {
+  padding: 6px 16px;
+}
+
+
+/* Inbound list fixed column sizing */
+.inbound-table-shell .inbound-table-row {
+  grid-template-columns: 132px 170px 118px 120px 88px 88px;
+  min-width: 716px;
+}
+
+.inbound-table-shell .inbound-table-row > :nth-child(4),
+.inbound-table-shell .inbound-table-row > :nth-child(5),
+.inbound-table-shell .inbound-table-row > :nth-child(6) {
+  width: 100%;
+}
+
+.inbound-table-shell > .inventory-ledger-head.inbound-table-row > :nth-child(4),
+.inbound-table-shell > .inventory-ledger-head.inbound-table-row > :nth-child(5),
+.inbound-table-shell > .inventory-ledger-head.inbound-table-row > :nth-child(6) {
+  justify-self: start;
+}
+
+
+.inbound-table-shell > .inventory-ledger-head.inbound-table-row {
+  padding: 14px 16px;
+}
+
+
+/* Inbound detail table matches inbound list */
+.inbound-detail-table {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.inbound-detail-table .inbound-items-head.inbound-detail-item-row,
+.inbound-detail-table .inbound-detail-item-row {
+  grid-template-columns: 132px 170px 118px 88px 88px 88px 96px;
+  min-width: 780px;
+  justify-items: start;
+}
+
+.inbound-detail-table .inbound-items-head.inbound-detail-item-row {
+  padding: 14px 16px;
+  background: var(--surface-soft);
+}
+
+.inbound-detail-table .inbound-detail-item-row {
+  padding: 6px 16px;
+  width: max-content;
+}
+
+.inbound-detail-table .inbound-detail-item-row > span,
+.inbound-detail-table .inbound-items-head.inbound-detail-item-row > span {
+  text-align: left;
+  width: 100%;
+}
+
+
+
+.inbound-detail-table .inbound-items-head.inbound-detail-item-row,
+.inbound-detail-table .inbound-detail-item-row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+}
+
+.inbound-detail-table .inbound-detail-item-row > span,
+.inbound-detail-table .inbound-items-head.inbound-detail-item-row > span {
+  padding-right: 8px;
+  box-sizing: border-box;
+}
+
+
+.inbound-layout {
+  align-items: stretch;
+}
+
+.inbound-list-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.inbound-list-panel .inbound-table-shell {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.inbound-list-panel .inbound-table-body {
+  flex: 1 1 auto;
+  max-height: none;
+}
+
+.inbound-list-panel .inventory-ledger-pagination {
+  margin-top: 12px;
+}
+
+
+/* Inbound list and detail panels keep the same overall height */
+.inbound-layout {
+  align-items: stretch;
+}
+
+.inbound-list-panel,
+.inbound-layout .detail-column,
+.inbound-layout .detail-column > .panel-card {
+  height: 100%;
+}
+
+.inbound-list-panel .inbound-table-shell {
+  flex: 1 1 auto;
+}
+
+.inbound-list-panel .inbound-table-body {
+  flex: 1 1 auto;
+  max-height: none;
+}
+
+
+
+
+
+
+
+.inbound-workflow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.inbound-workflow-steps .inbound-status-badge {
+  min-width: 96px;
+}
+
+.inbound-workflow-steps .inbound-status-badge.inactive {
+  border-color: var(--border);
+  background: var(--surface-soft);
+  color: var(--text-muted);
+}
+
+.inbound-workflow-steps .inbound-status-badge.active {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+
+.inbound-no-highlight {
+  margin: 2px 0 6px;
+  color: #b91c1c;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+
+
+
+
+.inbound-checking-actions {
+  margin-top: 12px;
+}
 
 
 

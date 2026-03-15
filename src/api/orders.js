@@ -1,6 +1,9 @@
+const LOCAL_API_URL = "/api";
+const REAL_API_URL = "https://amazon-ops-dashboard.onrender.com";
+
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL?.trim() ||
-  "https://amazon-ops-dashboard.onrender.com";
+  (import.meta.env.PROD ? REAL_API_URL : LOCAL_API_URL);
 
 export const ORDERS_ENDPOINT = `${API_BASE_URL.replace(/\/$/, "")}/orders/`;
 export const DELETE_ALL_ORDERS_ENDPOINT = `${ORDERS_ENDPOINT}delete-all`;
@@ -108,3 +111,4 @@ function formatRequestError(status, payload) {
     typeof payload === "string" ? payload : JSON.stringify(payload)
   }`;
 }
+

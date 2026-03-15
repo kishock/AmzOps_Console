@@ -3,6 +3,7 @@ import "./App.css";
 import ApiTestPage from "./pages/ApiTest/ApiTestPage";
 import PageHeader from "./components/layout/PageHeader";
 import Sidebar from "./components/layout/Sidebar";
+import InboundListPage from "./pages/Inbound/InboundListPage";
 import DashboardPage from "./pages/Dashboard/DashboardPage";
 import InventoryPage from "./pages/Inventory/InventoryPage";
 import LogsPage from "./pages/Logs/LogsPage";
@@ -18,11 +19,10 @@ const SIDEBAR_STATE_KEY = "amzops-sidebar-collapsed";
 
 const NAV_ITEMS = [
   { key: "dashboard", label: "Dashboard", href: "#/dashboard", icon: "grid" },
-  { key: "api-test", label: "API Test", href: "#/api-test", icon: "pulse" },
   { key: "orders", label: "Orders", href: "#/orders", icon: "orders" },
-  { key: "inventory", label: "Inventory", href: "#/inventory", icon: "inventory" },
+  { key: "inbound", label: "Inbound", href: "#/inbound", icon: "inbound" },
   { key: "warehouse", label: "Warehouse Tasks", href: "#/warehouse", icon: "reports" },
-  { key: "logs", label: "Logs", href: "#/logs", icon: "logs" },
+  { key: "inventory", label: "Inventory", href: "#/inventory", icon: "inventory" },
 ];
 
 const PAGE_META = {
@@ -37,6 +37,12 @@ const PAGE_META = {
     title: "Orders Workspace",
     description:
       "Inspect live orders, run sandbox sync tests, and validate API responses without leaving the operations console.",
+  },
+  inbound: {
+    eyebrow: "Receiving Queue",
+    title: "Inbound",
+    description:
+      "Monitor inbound receiving work, open ASN handling, and dock-side execution priorities.",
   },
   "api-test": {
     eyebrow: "Service Health",
@@ -130,6 +136,8 @@ function renderPage(route) {
   switch (route) {
     case "orders":
       return <OrdersPage />;
+    case "inbound":
+      return <InboundListPage />;
     case "inventory":
       return <InventoryPage />;
     case "api-test":
@@ -145,6 +153,7 @@ function renderPage(route) {
 }
 
 export default App;
+
 
 
 
