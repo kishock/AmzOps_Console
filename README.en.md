@@ -22,6 +22,8 @@ The image below is a README preview that shows the current UI structure.
   - Displays KPIs, status distribution, recent orders, and data-quality warnings based on Orders API data.
 - `Orders`
   - Provides an order table, detail panel, sandbox sync, and delete-all-orders action.
+- `Inbound`
+  - Provides inbound list/detail views, draft editing, receiving checks, putaway saving, and workflow completion actions.
 - `Inventory`
   - Provides an inventory list, status filters, stock adjustments, transaction ledger, and negative-stock validation.
 - `Warehouse Tasks`
@@ -51,6 +53,7 @@ amzops_console/
 ├─ src/
 │  ├─ api/
 │  │  ├─ health.js
+│  │  ├─ inbound.js
 │  │  ├─ inventory.js
 │  │  ├─ orders.js
 │  │  └─ warehouse.js
@@ -63,6 +66,8 @@ amzops_console/
 │  │  │  └─ ApiTestPage.jsx
 │  │  ├─ Dashboard/
 │  │  │  └─ DashboardPage.jsx
+│  │  ├─ Inbound/
+│  │  │  └─ InboundListPage.jsx
 │  │  ├─ Inventory/
 │  │  │  └─ InventoryPage.jsx
 │  │  ├─ Orders/
@@ -105,6 +110,10 @@ Backend communication layer.
   - Fetches inventory list
   - Fetches inventory transaction ledger
   - Submits stock adjustments
+- `inbound.js`
+  - Fetches inbound list and detail
+  - Creates, updates, and deletes draft inbounds
+  - Submits receiving, confirm-checking, putaway, and complete actions
 - `warehouse.js`
   - Fetches warehouse task list
   - Updates warehouse task status
@@ -129,6 +138,8 @@ Feature-based page modules.
   - Operations dashboard based on order data
 - `Orders`
   - Order table, detail panel, delete/sync actions
+- `Inbound`
+  - Inbound list/detail view, receiving workflow, putaway actions, draft editing
 - `Inventory`
   - Inventory list, stock adjustment form, transaction ledger
 - `Warehouse`
@@ -214,10 +225,20 @@ Supported routes:
 - `#/dashboard`
 - `#/api-test`
 - `#/orders`
+- `#/inbound`
 - `#/inventory`
 - `#/warehouse`
 
 If no hash is provided, `#/dashboard` opens by default.
+
+## Inbound Notes
+
+- The Inbound screen now uses the backend workflow endpoints under `/inbounds`.
+- Receiving save uses `POST /inbounds/{inbound_id}/receiving`, and confirm uses `POST /inbounds/{inbound_id}/confirm-checking`.
+- Putaway save uses `POST /inbounds/{inbound_id}/putaway` with `items: [{ item_id, location, putaway_qty }]`.
+- Inbound completion uses `POST /inbounds/{inbound_id}/complete`.
+- Putaway locations are restricted to preset options: `A-01-01`, `A-01-02`, `B-02-01`, `B-02-02`.
+- The checking summary cards, putaway table spacing, dark-mode date input visibility, and list/detail panel height have been adjusted for the current UI.
 
 ## Current Backend Endpoints
 

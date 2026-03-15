@@ -22,6 +22,8 @@ Amazon Ops Console은 Amazon 주문 운영 데이터를 조회하고, API 상태
   - Orders API 데이터를 기반으로 KPI, 상태 분포, 최근 주문, 데이터 품질 경고를 표시합니다.
 - `Orders`
   - 주문 테이블, 상세 패널, 샌드박스 동기화, 전체 주문 삭제 기능을 제공합니다.
+- `Inbound`
+  - 입고 목록/상세, Draft 수정, 검수 저장, Putaway 저장, 워크플로우 완료 기능을 제공합니다.
 - `Inventory`
   - 인벤토리 리스트, 상태 필터, 재고 조정, 거래 원장, 음수 재고 방지 검증 기능을 제공합니다.
 - `Warehouse Tasks`
@@ -51,6 +53,7 @@ amzops_console/
 ├─ src/
 │  ├─ api/
 │  │  ├─ health.js
+│  │  ├─ inbound.js
 │  │  ├─ inventory.js
 │  │  ├─ orders.js
 │  │  └─ warehouse.js
@@ -63,6 +66,8 @@ amzops_console/
 │  │  │  └─ ApiTestPage.jsx
 │  │  ├─ Dashboard/
 │  │  │  └─ DashboardPage.jsx
+│  │  ├─ Inbound/
+│  │  │  └─ InboundListPage.jsx
 │  │  ├─ Inventory/
 │  │  │  └─ InventoryPage.jsx
 │  │  ├─ Orders/
@@ -105,6 +110,10 @@ amzops_console/
   - 인벤토리 목록 조회
   - 거래 원장 조회
   - 재고 조정 요청 전송
+- `inbound.js`
+  - 입고 목록 및 상세 조회
+  - Draft 입고 생성, 수정, 삭제
+  - 검수 저장, 검수 확정, Putaway 저장, 입고 완료 요청
 - `warehouse.js`
   - 창고 작업 목록 조회
   - 작업 상태 업데이트
@@ -129,6 +138,8 @@ amzops_console/
   - 주문 데이터 기반 운영 대시보드
 - `Orders`
   - 주문 테이블, 상세 패널, 삭제/동기화 기능
+- `Inbound`
+  - 입고 목록/상세, 검수 워크플로우, Putaway 작업, Draft 수정
 - `Inventory`
   - 재고 리스트, 상태 필터, 조정 입력, 거래 원장
 - `Warehouse`
@@ -214,10 +225,20 @@ amzops_console/
 - `#/dashboard`
 - `#/api-test`
 - `#/orders`
+- `#/inbound`
 - `#/inventory`
 - `#/warehouse`
 
 해시가 없으면 기본값으로 `#/dashboard`가 열립니다.
+
+## Inbound 변경 사항
+
+- Inbound 화면은 이제 `/inbounds` 백엔드 워크플로우 엔드포인트를 기준으로 동작합니다.
+- 검수 저장은 `POST /inbounds/{inbound_id}/receiving`, 검수 확정은 `POST /inbounds/{inbound_id}/confirm-checking`을 사용합니다.
+- Putaway 저장은 `POST /inbounds/{inbound_id}/putaway`를 사용하며, 요청 본문은 `items: [{ item_id, location, putaway_qty }]` 형식입니다.
+- 입고 완료는 `POST /inbounds/{inbound_id}/complete`를 사용합니다.
+- Putaway Location은 `A-01-01`, `A-01-02`, `B-02-01`, `B-02-02` 고정 옵션 드롭다운으로 제한했습니다.
+- Checking 요약 카드 여백, Putaway 테이블 간격, 다크모드 날짜 입력 가시성, 리스트/상세 패널 높이를 현재 UI 기준으로 정리했습니다.
 
 ## 현재 사용하는 백엔드 엔드포인트
 
